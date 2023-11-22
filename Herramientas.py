@@ -1,5 +1,5 @@
 
-
+from textblob import TextBlob as txb
 import pandas as pd
 import re
 
@@ -39,4 +39,24 @@ def extraccion_anio_wstring(col):
     else:
         return None
         
+def analisis_sentimiento(col):
+
+    item = txb(col)
+    polaridad= item.sentiment.polarity
     
+    if polaridad < -0.25:
+        return 0
+    elif polaridad > 0.25:
+        return 2
+    else:
+        return 1
+    
+
+def cantidad_porcentaje(dataframe, columna):
+    
+    cantidad = dataframe.shape[0]
+    cantidad_columna = dataframe[columna].value_counts()
+    porcentaje_columna = round((cantidad_columna / cantidad) * 100, 2)
+    
+    print(f'Los valores de {columna}\n{cantidad_columna.to_string(header=False)}')
+    print(f'El porcentaje de cada valor\n{porcentaje_columna.to_string(header=False)}')
