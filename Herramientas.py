@@ -2,7 +2,8 @@
 from textblob import TextBlob as txb
 import pandas as pd
 import re
-
+import json
+import ast
 
 def analizar_datos(df):
     
@@ -60,3 +61,21 @@ def cantidad_porcentaje(dataframe, columna):
     
     print(f'Los valores de {columna}\n{cantidad_columna.to_string(header=False)}')
     print(f'El porcentaje de cada valor\n{porcentaje_columna.to_string(header=False)}')
+
+def read_json(ruta):
+
+    filas=[]
+    with open(ruta,encoding='utf-8') as r:
+        for lines in r.readlines():
+            try: 
+                datos = json.loads(lines)
+                filas.append(datos)
+            except json.JSONDecodeError:
+                filas.append(ast.literal_eval(lines))
+    print('El archivo se leyó con éxito')
+    return filas            
+
+def export_data_csv(ruta_nueva,dataframe):
+    
+    dataframe.to_csv(ruta_nueva,index=False,encoding='utf-8')
+    print('El archivo se exportó con éxito')
