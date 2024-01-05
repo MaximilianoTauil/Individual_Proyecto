@@ -1,11 +1,15 @@
+"""
+Introducción:
+
+Este archivo contiene funciones con una breve explicación de los parámetros que reciben y lo que devuelven. Los archivos se encuentran en formato Parquet serán pasados a un DataFrame para su utilización.
+
+"""
+# Importación de librerias.
 from fastapi import FastAPI
 import pandas as pd
 import pyarrow.parquet as pq
 
 app = FastAPI()
-
-#http://127.0.0.1:8000
-
 
 # Se realiza la carga de los archivos parquet en DataFrames para su utilización.
 
@@ -19,7 +23,16 @@ data_users = pd.read_parquet('Data_parquet/data_users.parquet')
 
 @app.get("/PlayTimeGenre")
 def PlayTimeGenre (genero:str):
+    """
+    Devuelve el año con más horas jugadas para dicho género
+
+    Parametro: 
+        Género (str): El género del videojuego 
+    
+    """
     data_play = data_playtime[data_playtime['genres'] == genero]
+    if data_play.empty:
+        return f"No hay datos para el género {genero}"
     data_play = data_play.sort_values(by='playtime_forever',ascending=False).head(1)
     date = data_play['release_date'].values[0]
     feedback = (f'Año de lanzamiento con más horas jugadas para Género {genero}: {date}')
@@ -30,7 +43,18 @@ def PlayTimeGenre (genero:str):
 @app.get("/UserForGenre")
 def UserForGenre(genero:str):
 
+    """
+    Devuelve el usuario que acumula más horas jugadas para un género dado
+    y una lista de acumulación de horas jugadas por año.
+
+    Parametro: 
+        Género (str): El género del videojuego 
+    
+    """
+
     data_genre = data_user_genre[data_user_genre['genres'] == genero]
+    if data_genre.empty:
+        return f"No hay datos para el género {genero}"
     data_usuario = data_genre.sort_values(by='playtime_forever',ascending=False).iloc[0]
     hours = data_usuario.at['playtime_forever']
     data_user =data_usuario.values[0]
@@ -42,7 +66,18 @@ def UserForGenre(genero:str):
             
 @app.get("/UsersRecommend")
 def UsersRecommend(año:int):
+
+    """
+    Devuelve el top 3 de juegos MÁS recomendados por usuarios para el año dado.
+
+    Parametro: 
+        Año (int): El año del que se utilice en la consulta
+    
+    """
+
     datarecommend = data_recommend[data_recommend['posted'] == año]
+    if datarecommend.empty:
+        return f"No hay datos para el año {año}"
     top3_games = datarecommend.sort_values(by= 'recommend',ascending= False).iloc[0:3]
     names = top3_games['app_name'].tolist()
     año = top3_games['posted'].tolist()
@@ -52,7 +87,19 @@ def UsersRecommend(año:int):
 @app.get("/UsersWorstDeveloper")
 def UsersWorstDeveloper(año:int):
 
+    """
+    Muestra el top 3 de desarrolladoras con juegos MENOS recomendados por usuarios
+    para el año dado
+
+    Argumentos:
+        Año (int): Año del que se utilice en la consulta
+    
+    """
+
     dfworst = data_users[(data_users['posted'] == año)]
+
+    if dfworst.empty:
+        return f"No hay datos para el año {año}"
 
     count_worst_dev = dfworst['developer'].value_counts()
 
@@ -67,6 +114,17 @@ def UsersWorstDeveloper(año:int):
 
 @app.get("/sentiment_analysis")
 def sentiment_analysis(desarrolladora:str ):
+
+    """
+    Devuelve un diccionario con el nombre de la desarrolladora y una lista con la 
+    cantidad de registros de reseñas de usuarios (positivos, neutros y negativos)
+
+    Argumentos:
+        Developer (str): Desarrollador del que se quiere saber las reseñas
+    """
+
     developer2= data_sentiment.loc[desarrolladora,[0,1,2]].to_list()
+    if developer2.empty:
+        return f"No se encontraron registros para la desarrolladora '{desarrolladora}'"
     write = {desarrolladora:developer2}
     return write
