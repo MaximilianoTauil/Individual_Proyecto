@@ -7,7 +7,6 @@ Este archivo contiene funciones con una breve explicación de los parámetros qu
 # Importación de librerias.
 from fastapi import FastAPI
 import pandas as pd
-import pyarrow.parquet as pq
 
 app = FastAPI()
 
@@ -18,7 +17,7 @@ data_recommend = pd.read_parquet('Data_parquet/data_recommend.parquet')
 data_sentiment = pd.read_parquet('Data_parquet/data_sentiment.parquet')
 data_user_genre = pd.read_parquet('Data_parquet/data_user_genre.parquet')
 data_users = pd.read_parquet('Data_parquet/data_users.parquet')
-
+data_similar_cosine = pd.read_parquet('Data_parquet/data_similar_cosine.parquet')
 
 
 @app.get("/PlayTimeGenre")
@@ -26,7 +25,7 @@ def PlayTimeGenre (genero:str):
     """
     Devuelve el año con más horas jugadas para dicho género
 
-    Parametro: 
+    Parámetros: 
         Género (str): El género del videojuego 
     
     """
@@ -47,7 +46,7 @@ def UserForGenre(genero:str):
     Devuelve el usuario que acumula más horas jugadas para un género dado
     y una lista de acumulación de horas jugadas por año.
 
-    Parametro: 
+    Parámetros: 
         Género (str): El género del videojuego 
     
     """
@@ -70,7 +69,7 @@ def UsersRecommend(año:int):
     """
     Devuelve el top 3 de juegos MÁS recomendados por usuarios para el año dado.
 
-    Parametro: 
+    Parámetros: 
         Año (int): El año del que se utilice en la consulta
     
     """
@@ -91,7 +90,7 @@ def UsersWorstDeveloper(año:int):
     Muestra el top 3 de desarrolladoras con juegos MENOS recomendados por usuarios
     para el año dado
 
-    Argumentos:
+    Parámetros:
         Año (int): Año del que se utilice en la consulta
     
     """
@@ -119,7 +118,7 @@ def sentiment_analysis(desarrolladora:str ):
     Devuelve un diccionario con el nombre de la desarrolladora y una lista con la 
     cantidad de registros de reseñas de usuarios (positivos, neutros y negativos)
 
-    Argumentos:
+    Parámetros:
         Developer (str): Desarrollador del que se quiere saber las reseñas
     """
 
@@ -128,3 +127,22 @@ def sentiment_analysis(desarrolladora:str ):
         return f"No se encontraron registros para la desarrolladora '{desarrolladora}'"
     write = {desarrolladora:developer2}
     return write
+
+@app.get("/recomendacion_juego")
+def Recomendacion_juego(id_juego:str):
+
+    """
+    Devuelve el nombre de los 5 juegos más similares al que se ingreso por parámetro.
+
+    Parámetros:
+        id_juego: Nombre del juego del cual se quiere ver los similares
+    """
+    if id_juego not in data_similar_cosine.columns:
+        return {"message": f'El juego {id_juego} no esta disponible.'}
+    orden = data_similar_cosine.sort_values(by=id_juego,ascending=False).index[1:6]
+    
+    similar_games = []
+
+    for nro, game in enumerate(orden,start=1):
+        similar_games.append(f'Nro {nro}: {game}')
+    return {"message": f'Los 5 juegos más parecidos a {id_juego} son: {similar_games}'}
