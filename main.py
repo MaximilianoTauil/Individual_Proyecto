@@ -122,11 +122,13 @@ def sentiment_analysis(desarrolladora:str ):
         Developer (str): Desarrollador del que se quiere saber las reseñas
     """
 
-    developer2= data_sentiment.loc[desarrolladora,[0,1,2]].to_list()
+    developer2= data_sentiment.loc[desarrolladora,[0,1,2]]
     if developer2.empty:
         return f"No se encontraron registros para la desarrolladora '{desarrolladora}'"
-    write = {desarrolladora:developer2}
+    developer2_list = developer2.to_list()
+    write = {desarrolladora:developer2_list}
     return write
+
 
 @app.get("/recomendacion_juego")
 def Recomendacion_juego(id_juego:str):
