@@ -116,7 +116,7 @@ def sentiment_analysis(desarrolladora:str ):
 
     """
     Devuelve un diccionario con el nombre de la desarrolladora y una lista con la 
-    cantidad de registros de reseñas de usuarios (positivos, neutros y negativos)
+    cantidad de registros de reseñas de usuarios (negativos, neutros y positivos)
 
     Parámetros:
         Developer (str): Desarrollador del que se quiere saber las reseñas
